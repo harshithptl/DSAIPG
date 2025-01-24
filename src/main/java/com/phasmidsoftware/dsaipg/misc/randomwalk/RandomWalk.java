@@ -14,15 +14,20 @@ import java.util.Random;
  */
 public class RandomWalk {
 
+    private int x = 0;
+    private int y = 0;
+
+    private final Random random = new Random();
+
     /**
      * Method to compute the distance from the origin (the lamp-post where the drunkard starts) to his current position.
      *
      * @return the (Euclidean) distance from the origin to the current position.
      */
     public double distance() {
-        // TO BE IMPLEMENTED 
-         return 0.0;
-        // END SOLUTION
+        // Euclidean distance in a 2D space is defined by the root of the sum of the squares of the corresponding coordinates on either axis
+        // Since the origin is (0,0) it can be omitted from the formula
+        return Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
     }
 
     /**
@@ -32,9 +37,8 @@ public class RandomWalk {
      * @param dy the distance he moves in the y direction
      */
     private void move(int dx, int dy) {
-        // TO BE IMPLEMENTED  do move
-         throw new RuntimeException("Not implemented");
-        // END SOLUTION
+        x += dx;
+        y += dy;
     }
 
     /**
@@ -43,8 +47,9 @@ public class RandomWalk {
      * @param m the number of steps the drunkard takes
      */
     private void randomWalk(int m) {
-        // TO BE IMPLEMENTED 
-throw new RuntimeException("implementation missing");
+        for (int i = 0; i < m; i++) {
+            randomMove();
+        }
     }
 
     /**
@@ -56,11 +61,6 @@ throw new RuntimeException("implementation missing");
         int step = random.nextBoolean() ? 1 : -1;
         move(ns ? step : 0, ns ? 0 : step);
     }
-
-    private int x = 0;
-    private int y = 0;
-
-    private final Random random = new Random();
 
     /**
      * Perform multiple random walk experiments, returning the mean distance.
@@ -85,17 +85,29 @@ throw new RuntimeException("implementation missing");
      * provided input arguments, and prints the mean distance.
      *
      * @param args command-line arguments where:
-     *             args[0] specifies the number of steps for a random walk (required),
-     *             and args[1] optionally specifies the number of experiments (default is 30).
+     *             args[0 ... n-2] specifies the number of steps for a random walk (required),
+     *             and args[n-1] optionally specifies the number of experiments (default is 30).
      *             If args is empty, the method throws a RuntimeException indicating invalid syntax.
      */
     public static void main(String[] args) {
-        if (args.length == 0)
+        if (args.length == 0) {
             throw new RuntimeException("Syntax: RandomWalk steps [experiments]");
-        int m = Integer.parseInt(args[0]);
+        }
+        int[] stepsArray = new int[args.length - 1];
+        for (int i = 0; i < args.length - 1; i++) {
+            stepsArray[i] = Integer.parseInt(args[i]);
+        }
         int n = 30;
-        if (args.length > 1) n = Integer.parseInt(args[1]);
-        double meanDistance = randomWalkMulti(m, n);
-        System.out.println(m + " steps: " + meanDistance + " over " + n + " experiments");
+        if (args.length > 1) {
+            n = Integer.parseInt(args[args.length - 1]);
+        }
+
+        System.out.println("Random Walk Experiments for " + n + " steps");
+        System.out.println("Steps (m)\tMean Distance (d)\tSquare Root of the Steps (m ^ 0.5)");
+
+        for (int m : stepsArray) {
+            double meanDistance = randomWalkMulti(m, n);
+            System.out.printf("\t%d\t\t\t\t%.2f\t\t\t\t%.2f\n", m, meanDistance, Math.pow(m, 0.5)); //Had to format this
+        }
     }
 }
