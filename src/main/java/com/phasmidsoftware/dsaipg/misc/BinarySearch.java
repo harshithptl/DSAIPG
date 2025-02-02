@@ -33,13 +33,19 @@ public class BinarySearch {
      * @param key  the value we are searching for.
      * @return the index of the element whose value is <code>key</code>, or null if there is no such element.
      */
-    static int binarySearch(int[] a, int from, int to, int key) {
-        int lo = from;
-        int hi = to;
-        while (hi > lo) {
-            // TO BE IMPLEMENTED  : implement binary search
-             return -1;
-            // END SOLUTION
+    public static int binarySearch(int[] a, int from, int to, int key) {
+        int low = from;
+        int high = to - 1;
+
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            if (a[mid] < key) {
+                low = mid + 1;
+            } else if (a[mid] > key) {
+                high = mid - 1;
+            } else {
+                return mid;
+            }
         }
         return -1;
     }
