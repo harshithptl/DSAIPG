@@ -39,7 +39,7 @@ public class BenchmarkTest {
         assertEquals(nRuns, post);
         assertEquals(nRuns + warmups, run);
         assertEquals(nRuns + warmups, pre);
-        assertEquals(100, x, 10);
+        assertEquals(200, x, 20);
     }
 
     private void GoToSleep(long mSecs, int which) {

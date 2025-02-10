@@ -5,15 +5,15 @@
 package com.phasmidsoftware.dsaipg.sort.elementary;
 
 import com.phasmidsoftware.dsaipg.sort.*;
-import com.phasmidsoftware.dsaipg.util.Config;
-import com.phasmidsoftware.dsaipg.util.LazyLogger;
-import com.phasmidsoftware.dsaipg.util.PrivateMethodTester;
-import com.phasmidsoftware.dsaipg.util.StatPack;
+import com.phasmidsoftware.dsaipg.util.*;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import static com.phasmidsoftware.dsaipg.sort.Instrument.*;
 import static com.phasmidsoftware.dsaipg.util.ConfigTest.INVERSIONS;
@@ -265,6 +265,62 @@ public class InsertionSortTest {
         assertEquals(62, instrumenter.getLookups());
     }
 
+    @Test
+    public void testInsertionSortBenchmark() {
+        String[] types = {"Random", "Ordered", "Partially Ordered", "Reverse Ordered"};
+
+        for (int size = INITIAL_SIZE; size <= MAX_SIZE; size *= 2) {
+            System.out.println("\nTesting array size: " + size);
+            for (String type : types) {
+                double time = benchmarkInsertionSort(size, type, RUNS);
+                System.out.printf("Array Type: %s | Size: %d | Avg Time: %.5f ms%n", type, size, time);
+            }
+        }
+    }
+
+    private double benchmarkInsertionSort(int size, String type, int runs) {
+        final Config config = setupConfig("true", "true", "0", "1", "", "");
+
+        Supplier<Integer[]> supplier = () -> generateArray(size, type);
+        InstrumentedComparatorHelper<Integer> helper = new InstrumentedComparableHelper<>("Benchmark insertion sort", supplier.get().length, config);
+        InsertionSortComparator<Integer> sorter = new InsertionSortComparator<>(helper);
+        Consumer<Integer[]> sortingFunction = arr -> sorter.sort(arr, 0, arr.length);
+
+        Benchmark_Timer<Integer[]> benchmark = new Benchmark_Timer<>("InsertionSort " + type, sortingFunction);
+        return benchmark.runFromSupplier(supplier, runs);
+    }
+
+    private static Integer[] generateArray(int size, String type) {
+        Integer[] array = new Integer[size];
+        switch (type) {
+            case "Random":
+                for (int i = 0; i < size; i++) array[i] = RANDOM.nextInt(10000);
+                break;
+            case "Ordered":
+                for (int i = 0; i < size; i++) array[i] = i;
+                break;
+            case "Partially Ordered":
+                for (int i = 0; i < size; i++) array[i] = i;
+                for (int i = 0; i < size / 10; i++) {
+                    int idx1 = RANDOM.nextInt(size), idx2 = RANDOM.nextInt(size);
+                    int temp = array[idx1];
+                    array[idx1] = array[idx2];
+                    array[idx2] = temp;
+                }
+                break;
+            case "Reverse Ordered":
+                for (int i = 0; i < size; i++) array[i] = size - i;
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown array type: " + type);
+        }
+        return array;
+    }
+
+    private static final int INITIAL_SIZE = 1000;
+    private static final int MAX_SIZE = 32000;
+    private static final int RUNS = 20;
+    private static final Random RANDOM = new Random();
     final static LazyLogger logger = new LazyLogger(InsertionSort.class);
 
 }
